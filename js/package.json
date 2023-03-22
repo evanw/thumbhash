@@ -1,0 +1,12 @@
+{
+  "name": "thumbhash",
+  "version": "0.1.1",
+  "description": "A very compact representation of an image placeholder",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evanw/thumbhash"
+  },
+  "type": "module",
+  "main": "thumbhash.js",
+  "license": "MIT"
+}
