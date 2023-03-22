@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf8">
+  <style>
+    body {
+      color: #CCC;
+      background: #222;
+      padding: 30px;
+      margin: 0 auto 100px auto;
+      max-width: 900px;
+      font: 16px/22px sans-serif;
+    }
+
+    h1,
+    h2,
+    a,
+    b {
+      color: #FFF;
+    }
+
+    h1,
+    h2 {
+      margin: 60px -30px -15px -30px;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    h2 a {
+      display: none;
+      float: left;
+      margin-left: -20px;
+      opacity: 0.7;
+      text-decoration: none;
+    }
+
+    h2:hover a {
+      display: block;
+    }
+
+    button {
+      vertical-align: middle;
+      padding: 3px 12px;
+      border-radius: 4px;
+      color: inherit;
+      background: #444;
+      border: 1px solid #777;
+    }
+
+    button:hover {
+      background: #4B4B4B;
+    }
+
+    button:active {
+      padding: 4px 12px 2px 12px;
+      background: #333;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.5);
+      border-color: #555;
+      color: #AAA;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    img,
+    .checkerboard,
+    canvas {
+      display: inline-block;
+      background: url('data:image/svg+xml,<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" fill="white"/><path d="M0 8V0H8V8H16V16H8V8H0Z" fill="lightgray"/></svg>');
+      margin-bottom: 12px;
+      box-shadow: 0 0 0 1px #000;
+    }
+
+    .drag-outline {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      box-shadow: inset 0 0 0 10px #3BF;
+      display: none;
+      pointer-events: none;
+    }
+
+    .codec-table {
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+
+    .codec-table td {
+      text-align: center;
+    }
+
+    .codec-table td:first-child,
+    .codec-table td:last-child {
+      width: 200px;
+    }
+
+    .codec-table tr:last-child td {
+      vertical-align: top;
+    }
+
+    .codec-table textarea {
+      border: none;
+      padding: none;
+      background: none;
+      color: inherit;
+      resize: none;
+    }
+
+    .codec-table textarea:focus {
+      outline: none;
+      color: #FFF;
+    }
+
+    .codec-table .arrow {
+      text-align: center;
+      font-size: 200%;
+      width: 60px;
+      color: #FFF;
+    }
+
+    .list-table {
+      border-collapse: collapse;
+      margin: 50px 0;
+      width: 100%;
+    }
+
+    .list-table th {
+      width: 20%;
+      position: sticky;
+      top: 0;
+      background: #222;
+      padding: 10px 0;
+      font-weight: normal;
+    }
+
+    .list-table th:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-bottom: 2px solid #FB0;
+    }
+
+    .list-table td {
+      text-align: center;
+      padding: 20px;
+      white-space: pre-wrap;
+      vertical-align: top;
+    }
+
+    .list-table td:nth-child(2) {
+      background: #333;
+      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .list-table tr:first-child th:nth-child(2) {
+      color: #FFF;
+      background: #333;
+      font-weight: bold;
+    }
+
+    pre,
+    code,
+    textarea {
+      font: 14px/20px monospace;
+    }
+
+    code {
+      border-radius: 2px;
+      background: #000;
+      padding: 2px 4px;
+      margin: -2px 0;
+    }
+
+    pre {
+      margin: 30px;
+    }
+
+    pre .keyword {
+      color: #7BE;
+    }
+
+    pre .comment {
+      color: #777;
+    }
+
+    pre .number {
+      color: #EC8;
+    }
+
+    pre .preprocessor {
+      color: #D7B;
+    }
+
+    .list-table .hash {
+      font: 8px monospace;
+      margin: 12px auto 0 auto;
+      max-width: 80px;
+      word-wrap: break-word;
+      text-align: left;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>ThumbHash</h1>
+  <p>
+    A very compact representation of an image placeholder.
+    Store it inline with your data and show it while the real image is loading for a smoother loading experience.
+    It's similar to <a href="https://github.com/woltapp/blurhash">BlurHash</a> but with the following advantages:
+  </p>
+  <ul>
+    <li>Encodes more detail in the same space</li>
+    <li>Much faster to encode and decode</li>
+    <li>Also encodes the aspect ratio</li>
+    <li>Gives more accurate colors</li>
+    <li>Supports images with alpha</li>
+  </ul>
+  <p>
+    Despite doing all of these additional things, the code for ThumbHash is still similar in complexity to the code for
+    BlurHash. One potential drawback compared to BlurHash is that the parameters of the algorithm are not configurable
+    (everything is automatically configured).
+  </p>
+  <p>
+    The code for this is available at
+    <a href="https://github.com/evanw/thumbhash">https://github.com/evanw/thumbhash</a> and contains implementations for
+    JavaScript, Rust, and Swift. You can use <code>npm install thumbhash</code> to install the
+    <a href="https://www.npmjs.com/package/thumbhash">JavaScript package</a> and <code>cargo add thumbhash</code> to
+    install the <a href="https://crates.io/crates/thumbhash">Rust package</a>.
+  </p>
+
+  <h2 id="demo"><a href="#demo">#</a>Demo</h2>
+  <table class="codec-table">
+    <tr>
+      <td class="codec-input">
+        <img src="images/field.jpg" width="200" height="150">
+      </td>
+      <td class="arrow">&rarr;</td>
+      <td>
+        <br>
+        <textarea class="codec-hash" cols="20" rows="4" spellcheck="false">
+DC E7 11 25 80 78 77 78 7F 88 87 87 78 48 77 78 88 70 FA 3D C0</textarea>
+      </td>
+      <td class="arrow">&rarr;</td>
+      <td class="codec-output">
+        <img src="images/field-thumbhash.png" width="200" height="150">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <button class="codec-upload">Upload</button> or drag/drop<br>to try your own image
+      </td>
+      <td colspan="3">
+        ThumbHash generates an image<br>representation in a few bytes
+      </td>
+      <td>
+        Render the ThumbHash<br>as an image placeholder
+      </td>
+    </tr>
+  </table>
+
+  <h2 id="comparisons"><a href="#comparisons">#</a>Comparisons</h2>
+  <p>
+    The table below compares ThumbHash to several other similar approaches:
+  </p>
+  <ul>
+    <li>
+      <p>
+        <b>ThumbHash:</b>
+        ThumbHash encodes a higher-resolution luminance channel, a lower-resolution color channel, and an optional alpha
+        channel. The format is described in detail in the <a href="#details">details section</a>. There are no
+        parameters to configure.
+      </p>
+    </li>
+    <li>
+      <p>
+        <b>BlurHash:</b>
+        Uses <a href="https://github.com/woltapp/blurhash">BlurHash</a> with 3x3 components for square images, 4x3
+        components for landscape images, and 3x4 components for portrait images. This is the configuration recommended
+        in the documentation, and is roughly the same size as a ThumbHash encoded using base64.
+      </p>
+    </li>
+    <li>
+      <p>
+        <b>Potato WebP:</b>
+        This is an experiment of mine to see how Google's
+        <a href="https://developers.google.com/speed/webp/docs/compression">WebP image format</a> does at this. The
+        "hash" is just the contents of the "VP8" chunk in a minimal WebP file: 0% quality (i.e.
+        <a href="https://knowyourmeme.com/memes/recorded-with-a-potato.">potato quality</a>) and a size of 16x16, since
+        WebP encodes everything in 16x16 blocks. The image is reconstructed by blurring a scaled-up copy of a minimal
+        WebP file with the VP8 chunk reinserted.
+      </p>
+    </li>
+  </ul>
+  <p>
+    In addition to these sample images, you can also drag and drop your own images to compare them here.
+  </p>
+  <table class="list-table">
+    <tr>
+      <th>Original image</th>
+      <th>ThumbHash</th>
+      <th>BlurHash</th>
+      <th>Potato WebP</th>
+    </tr>
+  </table>
+  <noscript>
+    <p class="center">⚠️ This section requires JavaScript. Please enable JavaScript and reload the page. ⚠️</p>
+  </noscript>
+
+  <h2 id="details"><a href="#details">#</a>Details</h2>
+  <p>
+    The image is approximated using the
+    <a href="https://en.wikipedia.org/wiki/Discrete_cosine_transform">Discrete Cosine Transform</a>. Luminance is
+    encoded using up to 7 terms in each dimension while chrominance (i.e. color) is encoded using 3 terms in each
+    dimension. The optional alpha channel is encoded using 5 terms in each dimension if present. If alpha is present,
+    luminance is only encoded using up to 5 terms in each dimension.
+  </p>
+  <p>
+    Each channel of DCT coefficients comes in three parts: the DC term, the AC terms, and the scale. The DC term is the
+    coefficient for the 0th order cosine and the AC terms are the coefficients of all other cosines (DC and AC are terms
+    from signal processing). All values are quantized to only a few bits each. To maximize the useful numeric range, AC
+    values are scaled up by the maximum magnitude and the scale is saved separately. In addition, ThumbHash omits the
+    high-frequency half of the coefficients and only keep the low-frequency half. If you are familiar with JPEG's
+    zig-zag coefficient order, this roughly corresponds to stopping halfway through that sequence. The rationale is that
+    the low-frequency coefficients carry most of the information, and we also want a smooth image.
+  </p>
+  <p>
+    Luminance and chrominance is represented in a simple color space that's easy to encode and decode. It uses the
+    values L for luminance, P for yellow vs. blue, and Q for red vs. green (inspired by human eyesight). The
+    advantage of LPQ over RGB is that variation in luminance is typically more important than variation in chrominance,
+    so we can make better use of space by using more space for luminance and less space for chrominance. Note that the
+    range of L is 0 to 1 but the range of P and Q is -1 to 1 because they each represent a subtraction.
+  </p>
+  <p>To convert from RGB to LPQ:</p>
+  <pre>
+l = (r + g + b) / <span class="number">3</span>;
+p = (r + g) / <span class="number">2</span> - b;
+q = r - g;</pre>
+  <p>And to convert from LPQ back to RGB:</p>
+  <pre>
+b = l - <span class="number">2</span> / <span class="number">3</span> * p;
+r = (<span class="number">3</span> * l - b + q) / <span class="number">2</span>;
+g = r - q;</pre>
+  <p>
+    The file format is tightly packed and each number uses fewer than 8 bits.
+    If the ThumbHash file format were to be represented as a C++ struct, it might look something like this:
+  </p>
+  <pre>
+<span class="keyword">struct</span> ThumbHash {
+  <span class="comment">// 3 bytes</span>
+  <span class="keyword">uint8_t</span> l_dc : <span class="number">6</span>;
+  <span class="keyword">uint8_t</span> p_dc : <span class="number">6</span>;
+  <span class="keyword">uint8_t</span> q_dc : <span class="number">6</span>;
+  <span class="keyword">uint8_t</span> l_scale : <span class="number">5</span>;
+  <span class="keyword">uint8_t</span> has_alpha : <span class="number">1</span>;
+
+  <span class="comment">// 2 bytes</span>
+  <span class="keyword">uint8_t</span> l_count : <span class="number">3</span>;
+  <span class="keyword">uint8_t</span> p_scale : <span class="number">6</span>;
+  <span class="keyword">uint8_t</span> q_scale : <span class="number">6</span>;
+  <span class="keyword">uint8_t</span> is_landscape : <span class="number">1</span>;
+
+  <span class="comment">// Only present if "has_alpha" is 1</span>
+  <span class="preprocessor">#if</span> has_alpha
+    <span class="comment">// 1 byte</span>
+    <span class="keyword">uint8_t</span> a_dc : <span class="number">4</span>;
+    <span class="keyword">uint8_t</span> a_scale : <span class="number">4</span>;
+  <span class="preprocessor">#endif</span>
+
+  <span class="comment">// Each element is 4 bits</span>
+  <span class="keyword">uint8_t</span> l_ac[] : <span class="number">4</span>;
+  <span class="keyword">uint8_t</span> p_ac[] : <span class="number">4</span>;
+  <span class="keyword">uint8_t</span> q_ac[] : <span class="number">4</span>;
+
+  <span class="comment">// Only present if "has_alpha" is 1</span>
+  <span class="preprocessor">#if</span> has_alpha
+    <span class="keyword">uint8_t</span> a_ac[] : <span class="number">4</span>;
+  <span class="preprocessor">#endif</span>
+};</pre>
+  <p>
+    The colon syntax after each field is the number of bits used by that field. The length of each AC array is the
+    number of coefficients left after removing the 0th component (i.e. the DC component) and also removing the
+    high-frequency half of the components. Representing that in C code might look something like this for a single
+    channel, where <code>nx</code> and <code>ny</code> are the numbers of coefficients in each dimension:
+  </p>
+  <pre>
+<span class="keyword">for</span> (<span class="keyword">int</span> y = <span class="number">0</span>; y &lt; ny; y++)
+  <span class="keyword">for</span> (<span class="keyword">int</span> x = <span class="number">0</span>; x &lt; nx; x++)
+    <span class="keyword">if</span> ((x != <span class="number">0</span> || y != <span class="number">0</span>) && (x * ny + y * nx &lt; nx * ny))
+      readAC();</pre>
+  <p>
+    The number of luminance components is derived as follows:
+  </p>
+  <pre>
+<span class="keyword">if</span> (is_landscape) {
+  lx = max(<span class="number">3</span>, has_alpha ? <span class="number">5</span> : <span class="number">7</span>);
+  ly = max(<span class="number">3</span>, l_count);
+} <span class="keyword">else</span> {
+  lx = max(<span class="number">3</span>, l_count);
+  ly = max(<span class="number">3</span>, has_alpha ? <span class="number">5</span> : <span class="number">7</span>);
+}</pre>
+  <p>
+    Using the <code>is_landscape</code> and <code>has_alpha</code> flags like this to make the number of coefficients in
+    one dimension implicit is a way to save space. Since the number of components is automatically derived from the
+    aspect ratio of the original image, you can also use this information to derive an approximation of the original
+    aspect ratio.
+  </p>
+  <p>
+    If you just want the average color of the image (e.g. in a situation where showing a placeholder image is
+    impractical), you can get that by transforming the <code>l_dc</code>, <code>p_dc</code>, and <code>q_dc</code>
+    values from LPQ to RGB. These values are conveniently at the front of the file for this purpose.
+  </p>
+  <p>
+    Reference implementations for this algorithm can be found at
+    <a href="https://github.com/evanw/thumbhash">https://github.com/evanw/thumbhash</a>.
+  </p>
+
+  <div class="drag-outline"></div>
+
+  <script type="module">
+    import * as BlurHash from './blurhash.js'
+    import * as ThumbHash from './thumbhash.js'
+    import * as PotatoWebP from './potatowebp.js'
+
+    function showHash(text) {
+      const div = document.createElement('div')
+      div.className = 'hash'
+      div.textContent = text
+      return div
+    }
+
+    async function demoForImage(bytes, alsoUpdateDemo) {
+      const table = document.querySelector('.list-table')
+      const tr = document.createElement('tr')
+      const url = URL.createObjectURL(new Blob([bytes]))
+
+      // Load the image for the demo
+      if (alsoUpdateDemo) {
+        const img = new Image
+        img.src = url
+        await new Promise(cb => img.onload = cb)
+        const size = Math.max(img.width, img.height)
+        const w = Math.round(200 * img.width / size)
+        const h = Math.round(200 * img.height / size)
+        if (codecInput.firstElementChild) codecInput.firstElementChild.remove()
+        img.style.width = w + 'px'
+        img.style.height = h + 'px'
+        codecInput.append(img)
+      }
+
+      // Load the image
+      const img = new Image
+      img.src = url
+      await new Promise(cb => img.onload = cb)
+      URL.revokeObjectURL(url)
+      const size = Math.max(img.width, img.height)
+      const w = img.width = Math.round(100 * img.width / size)
+      const h = img.height = Math.round(100 * img.height / size)
+      const tdImg = document.createElement('td')
+      tdImg.append(img, `\n${bytes.byteLength} bytes (binary)\n-`)
+      tr.append(tdImg)
+
+      // Decode the image to RGBA (100x100 maximum size)
+      const canvas = document.createElement('canvas')
+      const c = canvas.getContext('2d')
+      canvas.width = w
+      canvas.height = h
+      c.drawImage(img, 0, 0, w, h)
+      const pixels = c.getImageData(0, 0, w, h)
+
+      // ThumbHash
+      const thumb = runThumbHash(w, h, pixels.data)
+      const tdThumb = document.createElement('td')
+      const thumbBase64 = btoa(String.fromCharCode(...thumb.hash)).replace(/=+$/, '')
+      thumb.img.width = img.width
+      thumb.img.height = img.height
+      tdThumb.append(thumb.img, `\n${thumb.hash.length} bytes (binary)\n${thumbBase64.length} bytes (base64)`, showHash(thumbBase64))
+      tr.append(tdThumb)
+
+      // Load the hash into the demo
+      if (alsoUpdateDemo) {
+        codecHash.value = [...thumb.hash].map(x => x.toString(16).padStart(2, '0')).join(' ').toUpperCase()
+        updateDemoFromHash()
+      }
+
+      // BlurHash
+      const blur345 = runBlurHash(w, h, pixels.data, w > h ? 4 : 3, h > w ? 4 : 3)
+      const tdBlur345 = document.createElement('td')
+      blur345.img.width = img.width
+      blur345.img.height = img.height
+      tdBlur345.append(blur345.img, `\n-\n${blur345.hash.length} bytes (base83)`, showHash(blur345.hash))
+      tr.append(tdBlur345)
+
+      // Potato WebP
+      const tdWebP = document.createElement('td')
+      runPotatoWebP(img).then(webp => {
+        if (webp) {
+          const base64 = btoa(String.fromCharCode(...webp.hash)).replace(/=+$/, '')
+          tdWebP.append(webp.canvas, `\n${webp.hash.length} bytes (binary)\n${base64.length} bytes (base64)`, showHash(base64))
+        } else {
+          tdWebP.append(`This browser can't\nencode WebP`)
+        }
+      })
+      tr.append(tdWebP)
+
+      // Add the row to the table
+      if (alsoUpdateDemo) table.insertBefore(tr, table.firstElementChild.nextElementSibling)
+      else table.append(tr)
+    }
+
+    function runThumbHash(w, h, rgba) {
+      const hash = ThumbHash.rgbaToThumbHash(w, h, rgba)
+      const img = new Image
+      img.src = ThumbHash.thumbHashToDataURL(hash)
+      return { hash, img }
+    }
+
+    function runBlurHash(w, h, rgba, nx, ny) {
+      const hash = BlurHash.encode(rgba, w, h, nx, ny)
+      const size = Math.max(w, h)
+      const thumb_w = Math.round(32 * w / size)
+      const thumb_h = Math.round(32 * h / size)
+      const thumb_rgba = BlurHash.decode(hash, thumb_w, thumb_h)
+      const img = new Image
+      img.src = ThumbHash.rgbaToDataURL(thumb_w, thumb_h, thumb_rgba)
+      return { hash, img }
+    }
+
+    async function runPotatoWebP(img) {
+      const hash = PotatoWebP.encode(img)
+      if (!hash) return null // This browser does not support encoding as WebP (e.g. Safari)
+      const canvas = await PotatoWebP.decode(hash)
+      canvas.style.width = img.width + 'px'
+      canvas.style.height = img.height + 'px'
+      return { hash, canvas }
+    }
+
+    (async () => {
+      const demos = [
+        'images/sunrise.jpg',
+        'images/sunset.jpg',
+        'images/field.jpg',
+        'images/fall.jpg',
+        'images/street.jpg',
+        'images/mountain.jpg',
+        'images/coast.jpg',
+        'images/firefox.png',
+        'images/opera.png',
+      ]
+      for (const promise of demos.map(x => fetch(x).then(x => x.arrayBuffer()))) {
+        await demoForImage(await promise)
+      }
+    })()
+
+    const codecInput = document.querySelector('.codec-input')
+    const codecOutput = document.querySelector('.codec-output')
+    const codecUpload = document.querySelector('.codec-upload')
+    const codecHash = document.querySelector('.codec-hash')
+
+    codecUpload.onclick = () => {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.onchange = () => {
+        if (input.files && input.files.length === 1) {
+          const reader = new FileReader
+          reader.onload = () => demoForImage(reader.result, true)
+          reader.readAsArrayBuffer(input.files[0])
+        }
+      }
+      document.body.append(input)
+      input.click()
+      input.remove()
+    }
+
+    function updateDemoFromHash() {
+      const hex = codecHash.value.replace(/[\s,\[\]]/g, '')
+      if (hex.length & 1 || /[^0-9a-fA-F]/.test(hex))
+        return
+      const hash = new Uint8Array(hex.length >> 1)
+      for (let i = 0; i < hex.length; i += 2)
+        hash[i >> 1] = parseInt(hex.slice(i, i + 2), 16)
+      const { w, h, rgba } = ThumbHash.thumbHashToRGBA(hash)
+      const canvas = document.createElement('canvas')
+      const c = canvas.getContext('2d')
+      const pixels = c.createImageData(w, h)
+      canvas.width = w
+      canvas.height = h
+      pixels.data.set(rgba)
+      c.putImageData(pixels, 0, 0)
+      if (codecOutput.firstElementChild) codecOutput.firstElementChild.remove()
+      canvas.style.width = codecInput.firstElementChild.width + 'px'
+      canvas.style.height = codecInput.firstElementChild.height + 'px'
+      codecOutput.append(canvas)
+    }
+
+    codecHash.value = 'DC E7 11 25 80 78 77 78 7F 88 87 87 78 48 77 78 88 70 FA 3D C0'
+    codecHash.oninput = updateDemoFromHash
+
+    const dragOutline = document.querySelector('.drag-outline')
+    let dragCounter = 0
+
+    document.ondragover = e => {
+      e.preventDefault()
+    }
+
+    document.ondragenter = e => {
+      dragOutline.style.display = ++dragCounter > 0 ? 'block' : 'none'
+    }
+
+    document.ondragleave = e => {
+      dragOutline.style.display = --dragCounter > 0 ? 'block' : 'none'
+    }
+
+    document.ondragend = () => {
+      dragCounter = 0
+      dragOutline.style.display = 'none'
+    }
+
+    document.ondrop = e => {
+      e.preventDefault()
+      dragCounter = 0
+      dragOutline.style.display = 'none'
+      const dataTransfer = e.dataTransfer
+      const files = dataTransfer && dataTransfer.files
+      if (files && files.length === 1) {
+        const reader = new FileReader
+        reader.onload = () => demoForImage(reader.result, true)
+        reader.readAsArrayBuffer(files[0])
+      }
+    }
+  </script>
+</body>
+
+</html>
