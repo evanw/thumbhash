@@ -11,7 +11,7 @@ public final class ThumbHash {
      */
     public static byte[] rgbaToThumbHash(int w, int h, byte[] rgba) {
         // Encoding an image larger than 100x100 is slow with no benefit
-        if (w > 100 || h > 100) throw new Error(w + "x" + h + " doesn't fit in 100x100");
+        if (w > 100 || h > 100) throw new IllegalArgumentException(w + "x" + h + " doesn't fit in 100x100");
 
         // Determine the average color
         float avg_r = 0, avg_g = 0, avg_b = 0, avg_a = 0;
