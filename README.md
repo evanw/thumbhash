@@ -3,7 +3,6 @@
  A very compact representation of a placeholder for an image. Store it inline with your data and show it while the real image is loading for a smoother loading experience. It's similar to [BlurHash](https://github.com/woltapp/blurhash) but with the following advantages:
 
 * Encodes more detail in the same space
-* Much faster to encode and decode
 * Also encodes the aspect ratio
 * Gives more accurate colors
 * Supports images with alpha
