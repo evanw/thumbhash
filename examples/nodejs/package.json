@@ -1,0 +1,8 @@
+{
+   "name": "thumbhash-nodejs-example",
+   "type": "module",
+   "dependencies": {
+      "jimp": "^0.22.7",
+      "thumbhash": "^0.1.1"
+   }
+}

@@ -1,0 +1,7 @@
+.prettierrc
+
+node_modules
+package-lock.json
+
+*thumbhash.png
+*dataurl.txt
