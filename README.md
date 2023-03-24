@@ -23,5 +23,6 @@ This repo contains implementations for the following languages:
 These additional implementations also exist outside of this repo:
 
 * Go: https://github.com/galdor/go-thumbhash
+* PHP: https://github.com/SRWieZ/thumbhash
 
 _If you want to add your own implementation here, you can send a PR that puts a link to your implementation in this README._
