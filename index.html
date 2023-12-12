@@ -582,12 +582,22 @@ g = r - q;</pre>
     }
 
     function updateDemoFromHash() {
-      const hex = codecHash.value.replace(/[\s,\[\]]/g, '')
-      if (hex.length & 1 || /[^0-9a-fA-F]/.test(hex))
+      const value = codecHash.value.replace(/[\s,\[\]]/g, '')
+      let hash
+      if (!(value.length & 1) && !/[^0-9a-fA-F]/.test(value)) {
+        // Hex input
+        hash = new Uint8Array(value.length >> 1)
+        for (let i = 0; i < value.length; i += 2)
+          hash[i >> 1] = parseInt(value.slice(i, i + 2), 16)
+      } else if ((value.length & 3) !== 1 && !/[^0-9a-zA-Z+\/=]/.test(value)) {
+        // Base64 input
+        const bytes = atob(value)
+        hash = new Uint8Array(bytes.length)
+        for (let i = 0; i < bytes.length; i++)
+          hash[i] = bytes.charCodeAt(i)
+      } else {
         return
-      const hash = new Uint8Array(hex.length >> 1)
-      for (let i = 0; i < hex.length; i += 2)
-        hash[i >> 1] = parseInt(hex.slice(i, i + 2), 16)
+      }
       const { w, h, rgba } = ThumbHash.thumbHashToRGBA(hash)
       const canvas = document.createElement('canvas')
       const c = canvas.getContext('2d')
@@ -597,8 +607,9 @@ g = r - q;</pre>
       pixels.data.set(rgba)
       c.putImageData(pixels, 0, 0)
       if (codecOutput.firstElementChild) codecOutput.firstElementChild.remove()
-      canvas.style.width = codecInput.firstElementChild.width + 'px'
-      canvas.style.height = codecInput.firstElementChild.height + 'px'
+      const size = Math.max(w, h)
+      canvas.style.width = Math.round(200 * w / size) + 'px'
+      canvas.style.height = Math.round(200 * h / size) + 'px'
       codecOutput.append(canvas)
     }
 
