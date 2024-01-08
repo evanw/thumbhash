@@ -22,6 +22,7 @@ This repo contains implementations for the following languages:
 
 These additional implementations also exist outside of this repo:
 
+* C#: https://github.com/jzebedee/ThumbHash
 * Go: https://github.com/galdor/go-thumbhash
 * Perl: https://github.com/mauke/Image-ThumbHash
 * PHP: https://github.com/SRWieZ/thumbhash
