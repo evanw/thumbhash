@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "sharp": "0.33.1"
+  }
+}
