@@ -555,7 +555,7 @@ func thumbHashToImage(hash: Data) -> NSImage {
 }
 #endif
 
-#if os(iOS)
+#if os(iOS) || os(tvOS)
 import UIKit
 
 func imageToThumbHash(image: UIImage) -> Data {
