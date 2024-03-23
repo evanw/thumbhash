@@ -26,5 +26,6 @@ These additional implementations also exist outside of this repo:
 * Perl: https://github.com/mauke/Image-ThumbHash
 * PHP: https://github.com/SRWieZ/thumbhash
 * Ruby: https://github.com/daibhin/thumbhash
+* C++: https://github.com/jansm04/thumbhash-cpp
 
 _If you want to add your own implementation here, you can send a PR that puts a link to your implementation in this README._
